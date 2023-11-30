@@ -4,6 +4,9 @@ RUSTC=rustc
 NASM=i686-elf-as
 QEMU=qemu-system-i386
 GRUB= grub-mkrescue
+SRC = src
+CARGO = cargo build --lib 
+TARGET = target/i686-unknown-linux-gnu/debug
 
 all: myos.iso
 
@@ -13,14 +16,15 @@ all: myos.iso
 
 .PHONY: clean run fclean
 
-kernel.o: kernel.rs
-	$(RUSTC) -O --target i686-unknown-linux-gnu --crate-type=lib -o $@ kernel.rs
+${TARGET}/libkernel.a: ${SRC}/main.rs
+	$(CARGO)
+#	$(RUSTC) -O --target i686-unknown-linux-gnu --crate-type=lib -o $@ ${SRC}/kernel.rs
 
 boot.o: boot.s
 	$(NASM) boot.s -o $@
 
-myos.bin: boot.o kernel.o
-	$(CC) -T linker.ld -o $@ -ffreestanding -O2 -nostdlib boot.o kernel.o -lgcc
+myos.bin: boot.o ${TARGET}/libkernel.a
+	$(CC) -T linker.ld -o $@ -ffreestanding -O2 -nostdlib boot.o ${TARGET}/libkernel.a -lgcc
 
 myos.iso: myos.bin
 	./script_grub.sh

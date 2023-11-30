@@ -1,0 +1,20 @@
+[package]
+name = "jembbos"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# le profile utilisé pour `cargo build`
+[profile.dev]
+panic = "abort" # désactive le déroulement de la pile lors d'un panic
+
+# le profile utilisé pour `cargo build --release`
+[profile.release]
+panic = "abort" # désactive le déroulement de la pile lors d'un panic
+
+[lib]
+name = "kernel"           # The name of the target.
+path = "src/main.rs"    # The source file of the target.
+edition = "2021"       # The edition of the target.
+crate-type = ["staticlib"]   # The crate types to generate
