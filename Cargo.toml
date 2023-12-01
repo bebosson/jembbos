@@ -8,6 +8,8 @@ edition = "2021"
 # le profile utilisé pour `cargo build`
 [profile.dev]
 panic = "abort" # désactive le déroulement de la pile lors d'un panic
+overflow-checks = false
+
 
 # le profile utilisé pour `cargo build --release`
 [profile.release]

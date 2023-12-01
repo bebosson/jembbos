@@ -3,9 +3,10 @@ rustflags = ["-C", "link-arg=-nostartfiles"]
 
 [build]
 target = "i686-unknown-linux-gnu"
+#build-std-features = ["compiler-builtins-mem"]
+#build-std = ["core"]
 
-[unstable]
-build-std-features = ["compiler-builtins-mem"]
-build-std = ["core"]
-#build-std = ["core", "compiler_builtins"]
-
+#[unstable]
+#build-std-features = ["compiler-builtins-mem"]
+#build-std = ["core"]
+#build-std-features = ["core", "compiler_builtins"]
