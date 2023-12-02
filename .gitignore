@@ -1,2 +1,5 @@
-/target
-/isodir
+target
+isodir
+obj
+*.bin
+*.iso

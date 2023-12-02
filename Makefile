@@ -1,49 +1,47 @@
+TARGET = target/i686-unknown-linux-gnu
 CC=i686-elf-gcc
-#LD=i686-elf-ld
-RUSTC=rustc
 NASM=i686-elf-as
 QEMU=qemu-system-i386
 GRUB= grub-mkrescue
 SRC = src
-CARGO = cargo build --lib --verbose# --release# -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem
-TARGET = target/i686-unknown-linux-gnu/debug
-#TARGET = target/i686-unknown-linux-gnu/release/
+OBJ = obj
+COMPRESS =
 
-all: myos.iso
+profile ?= debug
+ifeq (${profile}, release)
+	CARGO = cargo build --lib --verbose --release
+	T_PATH = ${TARGET}/release
+	COMPRESS = --compress=xz 
+else
+	CARGO = cargo build --lib --verbose
+	T_PATH = ${TARGET}/debug
+endif
 
-.SUFFIXES:
+all: jembbos.iso
 
 .SUFFIXES: .o .rs .asm
 
-.PHONY: clean run fclean
+.PHONY: clean run
 
-${TARGET}/libkernel.a: ${SRC}/main.rs
+${TARGET}/libkernel.a:# ${SRC}/main.rs
 	$(CARGO)
 
-#main.o: ${SRC}/main.rs
-#	$(RUSTC) -O --target i686-unknown-linux-gnu --crate-type=lib -o $@ ${SRC}/main.rs
+${OBJ}/boot.o: ${SRC}/boot.s
+	mkdir -p obj
+	$(NASM) ${SRC}/boot.s -o $@
 
-boot.o: boot.s
-	$(NASM) boot.s -o $@
+jembbos.bin: ${OBJ}/boot.o ${TARGET}/libkernel.a
+	$(CC) -T arch/x86/linker.ld -o $@ -ffreestanding -O2 -nostdlib ${OBJ}/boot.o ${T_PATH}/libkernel.a -lgcc
 
-myos.bin: boot.o ${TARGET}/libkernel.a
-	$(CC) -T linker.ld -o $@ -ffreestanding -O2 -nostdlib boot.o ${TARGET}/libkernel.a -lgcc
-
-#myos.bin: boot.o main.o
-#	$(CC) -T linker.ld -o $@ -ffreestanding -O2 -nostdlib boot.o main.o -lgcc
-
-myos.iso: myos.bin
+jembbos.iso: jembbos.bin
 	./script_grub.sh
-	$(GRUB) --compress=xz -o $@ isodir
+	$(GRUB) ${COMPRESS} -o $@ isodir
 
-run: myos.iso
+run: jembbos.iso
 	$(QEMU) -cdrom $<
 
 clean:
-	rm -f *.bin *.o
-
-fclean:
-	rm -f *.bin *.o *.iso
+	rm -rf isodir obj *.bin *.iso
 	cargo clean
 
-re: fclean all
+re: clean all
