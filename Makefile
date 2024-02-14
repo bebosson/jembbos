@@ -31,7 +31,8 @@ ${OBJ}/boot.o: ${SRC}/boot.s
 	$(NASM) ${SRC}/boot.s -o $@
 
 jembbos.bin: ${OBJ}/boot.o ${TARGET}/libkernel.a
-	$(CC) -T arch/x86/linker.ld -o $@ -ffreestanding -O2 -nostdlib ${OBJ}/boot.o ${T_PATH}/libkernel.a -lgcc
+	$(CC) -T arch/x86/linker.ld -o $@ -ffreestanding -O2 -nostdlib \
+	${OBJ}/boot.o ${T_PATH}/libkernel.a -lgcc
 
 jembbos.iso: jembbos.bin
 	./script_grub.sh
